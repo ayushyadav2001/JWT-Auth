@@ -1,5 +1,6 @@
 package com.mycompany.jwtdemo.config;
 
+import com.mycompany.jwtdemo.filter.JwtAuthenticationFilter;
 import com.mycompany.jwtdemo.service.CustomUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -19,6 +21,8 @@ public class JwtConfig extends WebSecurityConfigurerAdapter {
     //here we will manage the authentication process
     @Autowired
     private CustomUserDetailService customUserDetailService;
+    @Autowired
+    private JwtAuthenticationFilter JwtFilter;
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(customUserDetailService);
@@ -29,7 +33,7 @@ public class JwtConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().cors().disable().authorizeRequests().antMatchers("/api/generateToken").permitAll()
                 .anyRequest().authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
+    http.addFilterBefore(JwtFilter, UsernamePasswordAuthenticationFilter.class);
 
     }
 
